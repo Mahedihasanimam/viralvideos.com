@@ -861,6 +861,30 @@ a.read-more:hover::after {
   line-height: 1.2;
 }
 
+.adsterra-widget {
+  overflow: hidden;
+  padding: 14px;
+  text-align: center;
+}
+
+.adsterra-native-ad,
+.adsterra-banner-ad {
+  display: flex;
+  min-height: 90px;
+  align-items: center;
+  justify-content: center;
+}
+
+.adsterra-banner-ad {
+  min-height: 250px;
+}
+
+.adsterra-smartlink a {
+  color: #31942e;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 /* Live Search Box Widget */
 #customSearchBox {
   position: relative;

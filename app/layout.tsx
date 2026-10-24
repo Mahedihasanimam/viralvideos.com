@@ -1,4 +1,5 @@
 import './globals.css'
+import Script from 'next/script'
 import { getTexts } from '@/lib/supabase'
 
 export const dynamic = 'force-dynamic'
@@ -52,8 +53,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
         />
+        <Script
+          id="adsterra-popunder"
+          data-cfasync="false"
+          src="https://aarems.org/1/f023ee03cd0e81f8ac94c7462316d8ba"
+          strategy="beforeInteractive"
+        />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Script
+          data-cfasync="false"
+          src="https://bancadeltempoidea.org/14/7ca7d3009b54e2e6eb42f9b429b26800"
+        />
+      </body>
     </html>
   )
 }
