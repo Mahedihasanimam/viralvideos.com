@@ -2,7 +2,12 @@ import Link from 'next/link'
 import LiveSearchBox from './LiveSearchBox'
 import { getPopularPosts, getCategories } from '@/lib/data'
 import { formatBengaliDate } from '@/lib/date'
-import { Banner300x250Ad, NativeBannerAd, SmartlinkAd } from './AdsterraAds'
+import {
+  Banner160x300Ad,
+  Banner300x250Ad,
+  NativeBannerAd,
+  SmartlinkAd,
+} from './AdsterraAds'
 
 export default async function Sidebar() {
   const [popularPosts, categories] = await Promise.all([
@@ -85,9 +90,10 @@ export default async function Sidebar() {
           <Banner300x250Ad />
         </div>
 
-        <div className="widget adsterra-widget adsterra-smartlink-widget" id="AdsterraSmartlink">
-          <SmartlinkAd />
+        <div className="widget adsterra-widget adsterra-vertical-ad" id="AdsterraVerticalBanner">
+          <Banner160x300Ad />
         </div>
+
       </div>
     </aside>
   )

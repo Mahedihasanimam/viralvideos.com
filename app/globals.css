@@ -878,6 +878,17 @@ a.read-more:hover::after {
 
 .adsterra-banner-ad {
   min-height: 250px;
+  width: min(100%, var(--ad-width, 300px));
+  min-width: min(100%, var(--ad-width, 300px));
+  height: var(--ad-height, 250px);
+}
+
+.adsterra-vertical-ad .adsterra-banner-ad {
+  min-height: 300px;
+}
+
+.adsterra-tall-ad .adsterra-banner-ad {
+  min-height: 600px;
 }
 
 .adsterra-native-ad > div {
@@ -887,7 +898,53 @@ a.read-more:hover::after {
 .adsterra-banner-ad iframe {
   display: block;
   max-width: 100%;
+  width: var(--ad-width, 300px);
+  height: var(--ad-height, 250px);
   border: 0;
+}
+
+.site-top-ad,
+.content-banner-ad {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  text-align: center;
+}
+
+.site-top-ad {
+  margin: 10px auto 0;
+  min-height: 0;
+}
+
+.content-banner-ad {
+  margin: 18px auto 24px;
+  min-height: 60px;
+}
+
+.mobile-top-ad {
+  display: none;
+}
+
+.site-secondary-ad {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  max-width: 620px;
+  min-height: 60px;
+  margin: 8px auto 0;
+  overflow: hidden;
+  text-align: center;
+}
+
+.site-secondary-ad .adsterra-banner-ad {
+  min-height: 60px;
+  height: 60px;
+}
+
+.site-secondary-ad .adsterra-smartlink {
+  flex: 1 1 150px;
 }
 
 .in-content-ad {
@@ -913,29 +970,6 @@ a.read-more:hover::after {
 .adsterra-smartlink-widget {
   min-height: 0;
   margin-top: 4px;
-}
-
-.site-header-ad {
-  max-width: 640px;
-  margin: 12px auto 0;
-  padding: 0 15px;
-  text-align: center;
-}
-
-.site-header-ad .adsterra-smartlink,
-.post-list-ad {
-  display: flex;
-  justify-content: center;
-}
-
-.site-header-ad .adsterra-smartlink a,
-.post-list-ad .adsterra-smartlink a {
-  width: min(100%, 520px);
-}
-
-.post-list-ad {
-  margin: 18px 0;
-  padding: 8px 0;
 }
 
 /* Live Search Box Widget */
@@ -1736,6 +1770,18 @@ html.dark-mode-active body {
 
 /* 13. Responsive Media Queries */
 @media (max-width: 960px) {
+  .desktop-top-ad {
+    display: none;
+  }
+
+  .mobile-top-ad {
+    display: block;
+  }
+
+  .site-top-ad {
+    min-height: 50px;
+  }
+
   #main-wrapper {
     width: 100%;
     float: none;

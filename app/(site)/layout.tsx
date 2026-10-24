@@ -2,15 +2,13 @@ import TopBar from '@/components/TopBar'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import FloatingNightToggle from '@/components/FloatingNightToggle'
-import { SmartlinkAd } from '@/components/AdsterraAds'
-import Script from 'next/script'
+import { Banner320x50Ad, Banner468x60Ad, Banner728x90Ad, SmartlinkAd } from '@/components/AdsterraAds'
 
 export const dynamic = 'force-dynamic'
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <div id="outer-wrapper">
+    <div id="outer-wrapper">
       {/* Top Bar */}
       <TopBar />
 
@@ -18,7 +16,12 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <Header />
       <div className="clearfix"></div>
 
-      <div className="container site-header-ad">
+      <div className="site-top-ad">
+        <div className="desktop-top-ad"><Banner728x90Ad /></div>
+        <div className="mobile-top-ad"><Banner320x50Ad /></div>
+      </div>
+      <div className="site-secondary-ad">
+        <Banner468x60Ad />
         <SmartlinkAd />
       </div>
 
@@ -35,11 +38,6 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
 
       {/* Floating Night Mode Toggle Button */}
       <FloatingNightToggle />
-      </div>
-      <Script
-        data-cfasync="false"
-        src="https://bancadeltempoidea.org/14/7ca7d3009b54e2e6eb42f9b429b26800"
-      />
-    </>
+    </div>
   )
 }
