@@ -23,15 +23,6 @@ export default async function Sidebar() {
           </div>
         </div>
 
-        {/* Paid placements follow search and stay inside the sidebar flow. */}
-        <div className="widget adsterra-widget" id="AdsterraNative">
-          <NativeBannerAd />
-        </div>
-
-        <div className="widget adsterra-widget" id="AdsterraBanner">
-          <Banner300x250Ad />
-        </div>
-
         {/* Widget 2: Most Popular */}
         <div className="widget PopularPosts" id="PopularPosts3">
           <div className="widget-title">
@@ -83,6 +74,15 @@ export default async function Sidebar() {
               ))}
             </ul>
           </div>
+        </div>
+
+        {/* Paid placements remain below the site's original widgets. */}
+        <div className="widget adsterra-widget" id="AdsterraNative">
+          <NativeBannerAd />
+        </div>
+
+        <div className="widget adsterra-widget" id="AdsterraBanner">
+          <Banner300x250Ad />
         </div>
 
         <div className="widget adsterra-widget adsterra-smartlink-widget" id="AdsterraSmartlink">

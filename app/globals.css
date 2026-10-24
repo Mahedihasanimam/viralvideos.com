@@ -915,6 +915,29 @@ a.read-more:hover::after {
   margin-top: 4px;
 }
 
+.site-header-ad {
+  max-width: 640px;
+  margin: 12px auto 0;
+  padding: 0 15px;
+  text-align: center;
+}
+
+.site-header-ad .adsterra-smartlink,
+.post-list-ad {
+  display: flex;
+  justify-content: center;
+}
+
+.site-header-ad .adsterra-smartlink a,
+.post-list-ad .adsterra-smartlink a {
+  width: min(100%, 520px);
+}
+
+.post-list-ad {
+  margin: 18px 0;
+  padding: 8px 0;
+}
+
 /* Live Search Box Widget */
 #customSearchBox {
   position: relative;

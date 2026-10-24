@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import PostCard from '@/components/PostCard'
 import Sidebar from '@/components/Sidebar'
+import { SmartlinkAd } from '@/components/AdsterraAds'
 import { getPosts, getFeaturedPost } from '@/lib/data'
 
 export const dynamic = 'force-dynamic'
@@ -44,8 +45,11 @@ export default async function Home({ searchParams }: Props) {
           {/* Posts List */}
           <div className="blog-posts hfeed container index-post-wrap">
             <div className="grid-posts">
-              {displayPosts.map(post => (
-                <PostCard key={post.id} post={post} />
+              {displayPosts.map((post, index) => (
+                <div key={post.id}>
+                  <PostCard post={post} />
+                  {index === 2 && <div className="post-list-ad"><SmartlinkAd /></div>}
+                </div>
               ))}
             </div>
           </div>
