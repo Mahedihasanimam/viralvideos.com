@@ -4,9 +4,14 @@ create table if not exists categories (id uuid primary key default gen_random_uu
 create table if not exists posts (
   id uuid primary key default gen_random_uuid(), slug text unique not null, title text not null, excerpt text,
   content text, image_url text, imdb text, director text, stars text, genres text,
+  language text, country text, platform text, download_url text,
   category_id uuid references categories(id) on delete set null,
   published boolean default true, featured boolean default false, views int default 0, created_at timestamptz default now()
 );
+alter table posts add column if not exists language text;
+alter table posts add column if not exists country text;
+alter table posts add column if not exists platform text;
+alter table posts add column if not exists download_url text;
 create table if not exists pages (slug text primary key, title text not null, content text default '');
 create table if not exists nav_links (id uuid primary key default gen_random_uuid(), label text not null, url text not null, location text default 'header', sort int default 0);
 create table if not exists admins (user_id uuid primary key references auth.users on delete cascade);
