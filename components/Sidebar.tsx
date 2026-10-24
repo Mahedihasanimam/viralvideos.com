@@ -2,7 +2,7 @@ import Link from 'next/link'
 import LiveSearchBox from './LiveSearchBox'
 import { getPopularPosts, getCategories } from '@/lib/data'
 import { formatBengaliDate } from '@/lib/date'
-import { Banner300x250Ad, NativeBannerAd, SmartlinkAd } from './AdsterraAds'
+import { Banner300x250Ad, NativeBannerAd } from './AdsterraAds'
 
 export default async function Sidebar() {
   const [popularPosts, categories] = await Promise.all([
@@ -13,6 +13,15 @@ export default async function Sidebar() {
   return (
     <aside id="sidebar-wrapper">
       <div className="sidebar common-widget">
+        {/* Paid placements stay near the top so they remain visible on desktop and mobile. */}
+        <div className="widget adsterra-widget" id="AdsterraNative">
+          <NativeBannerAd />
+        </div>
+
+        <div className="widget adsterra-widget" id="AdsterraBanner">
+          <Banner300x250Ad />
+        </div>
+
         {/* Widget 1: Custom Live Search */}
         <div className="widget HTML" id="HTML2">
           <div className="widget-title">
@@ -76,17 +85,6 @@ export default async function Sidebar() {
           </div>
         </div>
 
-        <div className="widget adsterra-widget" id="AdsterraNative">
-          <NativeBannerAd />
-        </div>
-
-        <div className="widget adsterra-widget" id="AdsterraBanner">
-          <Banner300x250Ad />
-        </div>
-
-        <div className="widget adsterra-widget" id="AdsterraSmartlink">
-          <SmartlinkAd />
-        </div>
       </div>
     </aside>
   )

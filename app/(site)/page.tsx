@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import PostCard from '@/components/PostCard'
 import Sidebar from '@/components/Sidebar'
+import { SmartlinkAd } from '@/components/AdsterraAds'
 import { getPosts, getFeaturedPost } from '@/lib/data'
 
 export const dynamic = 'force-dynamic'
@@ -40,6 +41,10 @@ export default async function Home({ searchParams }: Props) {
             </Link>
           </div>
           <div className="clearfix"></div>
+
+          <div className="in-content-ad">
+            <SmartlinkAd />
+          </div>
 
           {/* Posts List */}
           <div className="blog-posts hfeed container index-post-wrap">
