@@ -862,7 +862,8 @@ a.read-more:hover::after {
 }
 
 .adsterra-widget {
-  padding: 14px;
+  min-height: 90px;
+  padding: 14px 10px;
   text-align: center;
 }
 
@@ -900,9 +901,18 @@ a.read-more:hover::after {
 }
 
 .adsterra-smartlink a {
+  display: block;
+  padding: 12px 8px;
+  border: 1px solid #e5ece6;
+  border-radius: 4px;
   color: #31942e;
   font-size: 13px;
   font-weight: 600;
+}
+
+.adsterra-smartlink-widget {
+  min-height: 0;
+  margin-top: 4px;
 }
 
 /* Live Search Box Widget */

