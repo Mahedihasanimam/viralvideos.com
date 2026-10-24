@@ -10,9 +10,12 @@ create table if not exists posts (
 create table if not exists pages (slug text primary key, title text not null, content text default '');
 create table if not exists nav_links (id uuid primary key default gen_random_uuid(), label text not null, url text not null, location text default 'header', sort int default 0);
 create table if not exists admins (user_id uuid primary key references auth.users on delete cascade);
+grant select on admins to authenticated;
 
 create or replace function is_admin() returns boolean language sql security definer stable
-as $$ select exists (select 1 from admins where user_id = auth.uid()) $$;
+set search_path = public
+as $$ select exists (select 1 from public.admins where user_id = auth.uid()) $$;
+grant execute on function is_admin() to anon, authenticated;
 
 create or replace function increment_views(p_slug text) returns void language sql security definer
 as $$ update posts set views = views + 1 where slug = p_slug $$;

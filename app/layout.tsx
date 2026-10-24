@@ -10,6 +10,7 @@ export async function generateMetadata() {
     t('site_description') ||
     'ViralVideo – Get trending movie and series reviews in Bengali, English, and Hindi. Discover detailed insights on the latest releases.'
   return {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
     title,
     description,
     icons: {
