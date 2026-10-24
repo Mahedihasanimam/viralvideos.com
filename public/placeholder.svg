@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="340" viewBox="0 0 600 340">
+  <rect width="600" height="340" fill="#253137"/>
+  <rect x="240" y="110" width="120" height="120" rx="16" fill="#31942e"/>
+  <polygon points="285,145 335,170 285,195" fill="#ffffff"/>
+  <text x="300" y="270" fill="#ffffff" font-family="'Fira Sans', sans-serif" font-size="20" font-weight="600" text-anchor="middle">Review Bazar Movies</text>
+</svg>
