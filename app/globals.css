@@ -650,10 +650,10 @@ a.read-more:hover::after {
 }
 
 .adsterra-banner-ad {
-  min-height: 250px;
+  min-height: var(--ad-height, 90px);
   width: min(100%, var(--ad-width, 300px));
   min-width: min(100%, var(--ad-width, 300px));
-  height: var(--ad-height, 250px);
+  height: var(--ad-height, 90px);
 }
 
 .adsterra-vertical-ad .adsterra-banner-ad {
