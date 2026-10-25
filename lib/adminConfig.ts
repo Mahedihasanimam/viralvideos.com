@@ -96,6 +96,59 @@ export const CFG: Record<string, any> = {
       { n: 'key', l: 'System Key (do not change)', lockOnEdit: true },
     ],
   },
+
+  ad_settings: {
+    title: 'Ad Settings',
+    singular: 'Ad',
+    icon: 'external',
+    table: 'ad_settings',
+    pk: 'id',
+    order: 'slot',
+    asc: true,
+    cols: ['slot', 'label', 'ad_type'],
+    fields: [
+      { n: 'slot', l: 'Slot Name (স্লট নাম)', req: true, lockOnEdit: true, placeholder: 'e.g. banner_468x60' },
+      { n: 'label', l: 'Admin Label (চিহ্নিত করার নাম)', req: true, placeholder: 'Top desktop banner' },
+      {
+        n: 'ad_type',
+        l: 'Ad Type (অ্যাডের ধরন)',
+        t: 'select',
+        options: [
+          { value: 'banner', label: 'Banner / Iframe' },
+          { value: 'native', label: 'Native Script' },
+          { value: 'smartlink', label: 'Smartlink' },
+        ],
+      },
+      {
+        n: 'key_value',
+        l: 'Adsterra Key / Container ID',
+        placeholder: 'যেমন: 6aee385fd7d8587b55e2df7c7f10bc8d',
+        hint: "ব্যানারের জন্য 'key' এর মান, আর নেটিভ অ্যাডের জন্য container- এর পরের কোড বসাবেন।",
+      },
+      {
+        n: 'script_url',
+        l: 'Script URL',
+        t: 'url',
+        placeholder: 'https://bancadeltempoidea.org/.../invoke.js',
+        hint: 'Adsterra স্ক্রিপ্ট ট্যাগের src লিংক (শুরুতে https: সহ বসাবেন)।',
+      },
+      {
+        n: 'target_url',
+        l: 'Smartlink URL',
+        t: 'url',
+        placeholder: 'https://directyp.org/4/...',
+        hint: 'Smartlink / Direct link-এর ক্ষেত্রে পুরো লিংক এখানে বসাবেন।',
+      },
+      { n: 'width', l: 'Width (px)', t: 'num', placeholder: '468', hint: 'ব্যানারের প্রস্থ (যেমন: 300, 728, 468, 160)।' },
+      { n: 'height', l: 'Height (px)', t: 'num', placeholder: '60', hint: 'ব্যানারের উচ্চতা (যেমন: 250, 90, 60, 300)।' },
+      {
+        n: 'enabled',
+        l: 'Show this ad on the website (ওয়েবসাইটে অ্যাডটি দেখাবে)',
+        t: 'bool',
+        hint: 'অ্যাডটি সাময়িক বন্ধ রাখতে টিক চিহ্নটি তুলে দিন, ডিলিট করার দরকার নেই।',
+      },
+    ],
+  },
 }
 
 export const NAV_SECTIONS = [
@@ -105,5 +158,6 @@ export const NAV_SECTIONS = [
   { key: 'pages', label: 'Pages', icon: 'file-text' },
   { key: 'nav_links', label: 'Menus', icon: 'menu' },
   { key: 'site_texts', label: 'Website Texts', icon: 'type' },
+  { key: 'ad_settings', label: 'Ad Settings', icon: 'external' },
   { key: 'settings', label: 'Help & Database', icon: 'settings' },
 ]

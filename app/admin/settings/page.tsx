@@ -161,14 +161,31 @@ export default function SettingsPage() {
 
           <h3 className="settings-subheading">Database Schema & Permissions Fix</h3>
           <p className="settings-card-desc">
-            Fixes "column not found" and "permission denied" errors. Run this once in <strong>Supabase Dashboard &gt; SQL Editor</strong>:
+            Creates all tables (including <strong>Ad Settings</strong>) and fixes permissions. Run this once in <strong>Supabase Dashboard &gt; SQL Editor</strong>:
           </p>
           <div className="settings-sql-block">
-            <pre style={{ maxHeight: 160, overflowY: 'auto' }}>{`ALTER TABLE posts ADD COLUMN IF NOT EXISTS language text;
+            <pre style={{ maxHeight: 180, overflowY: 'auto' }}>{`-- 1. Create ad_settings table
+CREATE TABLE IF NOT EXISTS ad_settings (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  slot text UNIQUE NOT NULL,
+  label text NOT NULL DEFAULT '',
+  ad_type text NOT NULL DEFAULT 'banner' CHECK (ad_type IN ('banner', 'native', 'smartlink')),
+  key_value text NOT NULL DEFAULT '',
+  script_url text NOT NULL DEFAULT '',
+  target_url text NOT NULL DEFAULT '',
+  width int NOT NULL DEFAULT 0,
+  height int NOT NULL DEFAULT 0,
+  enabled boolean NOT NULL DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- 2. Ensure post columns exist
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS language text;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS country text;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS platform text;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS download_url text;
 
+-- 3. Permissions
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated;
@@ -182,6 +199,28 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO authenticated;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO anon;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO authenticated;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON SEQUENCES TO anon;
+
+-- 4. Enable RLS & policies for ad_settings
+ALTER TABLE ad_settings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "read_ads" ON ad_settings;
+DROP POLICY IF EXISTS "admin_ads" ON ad_settings;
+CREATE POLICY "read_ads" ON ad_settings FOR SELECT USING (true);
+CREATE POLICY "admin_ads" ON ad_settings FOR ALL USING (
+  EXISTS (SELECT 1 FROM admins WHERE admins.user_id = auth.uid())
+);
+
+-- 5. Insert default ad slots if not exist
+INSERT INTO ad_settings (slot, label, ad_type, key_value, script_url, target_url, width, height) VALUES
+('native_sidebar', 'Sidebar native ad', 'native', '6fb853f324c105cabb940b068bf675d0', 'https://bancadeltempoidea.org/21/6fb853f324c105cabb940b068bf675d0', '', 0, 0),
+('banner_300x250', 'Sidebar 300x250 banner', 'banner', '6aee385fd7d8587b55e2df7c7f10bc8d', 'https://bancadeltempoidea.org/22/6aee385fd7d8587b55e2df7c7f10bc8d', '', 300, 250),
+('banner_468x60', 'Inline 468x60 banner', 'banner', 'a76fd710f7a27301e5c4e5a6a10ed59d', 'https://bancadeltempoidea.org/22/a76fd710f7a27301e5c4e5a6a10ed59d', '', 468, 60),
+('banner_160x300', 'Sidebar 160x300 banner', 'banner', '92d17c94bab006dd97e6cb8ae3e5d36c', 'https://bancadeltempoidea.org/22/92d17c94bab006dd97e6cb8ae3e5d36c', '', 160, 300),
+('banner_320x50', 'Mobile top 320x50 banner', 'banner', '439ae85f24a41e503f4433dcf29bfdb3', 'https://bancadeltempoidea.org/22/439ae85f24a41e503f4433dcf29bfdb3', '', 320, 50),
+('banner_728x90', 'Desktop top 728x90 banner', 'banner', '92befdeb1f92f13a75cdd637578617e7', 'https://bancadeltempoidea.org/22/92befdeb1f92f13a75cdd637578617e7', '', 728, 90),
+('smartlink_global', 'Global smartlink', 'smartlink', '', '', 'https://directyp.org/4/d74988ed07d2e9cf1ebf1e68fcddcb89', 0, 0),
+('popunder_global', 'Global popunder script', 'native', '', 'https://aarems.org/1/f023ee03cd0e81f8ac94c7462316d8ba', '', 0, 0),
+('socialbar_global', 'Global social bar script', 'native', '', 'https://bancadeltempoidea.org/14/7ca7d3009b54e2e6eb42f9b429b26800', '', 0, 0)
+ON CONFLICT (slot) DO NOTHING;
 
 INSERT INTO admins (user_id) SELECT id FROM auth.users ON CONFLICT DO NOTHING;
 
@@ -191,7 +230,21 @@ NOTIFY pgrst, 'reload schema';`}</pre>
             className="btn btn-primary"
             style={{ marginTop: 8 }}
             onClick={() => {
-              navigator.clipboard.writeText(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS language text;
+              navigator.clipboard.writeText(`CREATE TABLE IF NOT EXISTS ad_settings (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  slot text UNIQUE NOT NULL,
+  label text NOT NULL DEFAULT '',
+  ad_type text NOT NULL DEFAULT 'banner' CHECK (ad_type IN ('banner', 'native', 'smartlink')),
+  key_value text NOT NULL DEFAULT '',
+  script_url text NOT NULL DEFAULT '',
+  target_url text NOT NULL DEFAULT '',
+  width int NOT NULL DEFAULT 0,
+  height int NOT NULL DEFAULT 0,
+  enabled boolean NOT NULL DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS language text;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS country text;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS platform text;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS download_url text;
@@ -209,6 +262,26 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO authenticated;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO anon;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO authenticated;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON SEQUENCES TO anon;
+
+ALTER TABLE ad_settings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "read_ads" ON ad_settings;
+DROP POLICY IF EXISTS "admin_ads" ON ad_settings;
+CREATE POLICY "read_ads" ON ad_settings FOR SELECT USING (true);
+CREATE POLICY "admin_ads" ON ad_settings FOR ALL USING (
+  EXISTS (SELECT 1 FROM admins WHERE admins.user_id = auth.uid())
+);
+
+INSERT INTO ad_settings (slot, label, ad_type, key_value, script_url, target_url, width, height) VALUES
+('native_sidebar', 'Sidebar native ad', 'native', '6fb853f324c105cabb940b068bf675d0', 'https://bancadeltempoidea.org/21/6fb853f324c105cabb940b068bf675d0', '', 0, 0),
+('banner_300x250', 'Sidebar 300x250 banner', 'banner', '6aee385fd7d8587b55e2df7c7f10bc8d', 'https://bancadeltempoidea.org/22/6aee385fd7d8587b55e2df7c7f10bc8d', '', 300, 250),
+('banner_468x60', 'Inline 468x60 banner', 'banner', 'a76fd710f7a27301e5c4e5a6a10ed59d', 'https://bancadeltempoidea.org/22/a76fd710f7a27301e5c4e5a6a10ed59d', '', 468, 60),
+('banner_160x300', 'Sidebar 160x300 banner', 'banner', '92d17c94bab006dd97e6cb8ae3e5d36c', 'https://bancadeltempoidea.org/22/92d17c94bab006dd97e6cb8ae3e5d36c', '', 160, 300),
+('banner_320x50', 'Mobile top 320x50 banner', 'banner', '439ae85f24a41e503f4433dcf29bfdb3', 'https://bancadeltempoidea.org/22/439ae85f24a41e503f4433dcf29bfdb3', '', 320, 50),
+('banner_728x90', 'Desktop top 728x90 banner', 'banner', '92befdeb1f92f13a75cdd637578617e7', 'https://bancadeltempoidea.org/22/92befdeb1f92f13a75cdd637578617e7', '', 728, 90),
+('smartlink_global', 'Global smartlink', 'smartlink', '', '', 'https://directyp.org/4/d74988ed07d2e9cf1ebf1e68fcddcb89', 0, 0),
+('popunder_global', 'Global popunder script', 'native', '', 'https://aarems.org/1/f023ee03cd0e81f8ac94c7462316d8ba', '', 0, 0),
+('socialbar_global', 'Global social bar script', 'native', '', 'https://bancadeltempoidea.org/14/7ca7d3009b54e2e6eb42f9b429b26800', '', 0, 0)
+ON CONFLICT (slot) DO NOTHING;
 
 INSERT INTO admins (user_id) SELECT id FROM auth.users ON CONFLICT DO NOTHING;
 

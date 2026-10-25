@@ -4,6 +4,8 @@ import { db } from '@/lib/supabase'
 import AdminIcon from '@/components/AdminIcon'
 import ImageUploader from '@/components/ImageUploader'
 import RichTextEditor from '@/components/RichTextEditor'
+import AdGuide from '@/components/AdGuide'
+import AdExtractor from '@/components/AdExtractor'
 
 const PAGE_SIZE = 25
 
@@ -120,6 +122,12 @@ export default function Crud({ cfg }: { cfg: any }) {
     const defaults: any = { published: true, featured: false, views: 0 }
     if (cfg.table === 'site_texts') defaults.grp = 'General'
     if (cfg.table === 'nav_links') defaults.location = 'header'
+    if (cfg.table === 'ad_settings') {
+      defaults.ad_type = 'banner'
+      defaults.enabled = true
+      defaults.width = 0
+      defaults.height = 0
+    }
     setRow(defaults)
     setNew(true)
     setMsg('')
@@ -277,11 +285,23 @@ export default function Crud({ cfg }: { cfg: any }) {
           </div>
         )}
 
+        {cfg.table === 'ad_settings' && <AdGuide />}
+
         <div className="easy-card">
           <div className="easy-card-header">
             <h2>{isNew ? `Create New ${singular}` : `Edit: ${row.title || row.name || row.label || singular}`}</h2>
             <p className="easy-card-sub">Fill in the details below. Click <strong>Save Changes</strong> when you are done.</p>
           </div>
+
+          {cfg.table === 'ad_settings' && (
+            <div style={{ padding: '16px 24px 0' }}>
+              <AdExtractor
+                onExtract={(extracted) => {
+                  setRow((prev: any) => ({ ...prev, ...extracted }))
+                }}
+              />
+            </div>
+          )}
 
           <div className="easy-form-grid">
             {cfg.fields?.map((f: any) => {
@@ -376,6 +396,27 @@ export default function Crud({ cfg }: { cfg: any }) {
                       <option value="">— Select {f.l} —</option>
                       {(refs[f.n] || []).map((o: any) => (
                         <option key={o.id} value={o.id}>{o.name}</option>
+                      ))}
+                    </select>
+                    {f.hint && <p className="easy-field-hint">{f.hint}</p>}
+                  </div>
+                )
+              }
+
+              if (f.t === 'select') {
+                return (
+                  <div key={f.n} className="easy-field-row">
+                    <label className="easy-field-label" htmlFor={`field-${f.n}`}>
+                      {f.l} {f.req && <span className="easy-req">*</span>}
+                    </label>
+                    <select
+                      id={`field-${f.n}`}
+                      className="easy-input easy-select"
+                      value={val}
+                      onChange={e => setField(f.n, e.target.value)}
+                    >
+                      {f.options?.map((option: any) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
                       ))}
                     </select>
                     {f.hint && <p className="easy-field-hint">{f.hint}</p>}
@@ -485,6 +526,8 @@ export default function Crud({ cfg }: { cfg: any }) {
           <button className="easy-alert-close" onClick={() => setMsg('')}>×</button>
         </div>
       )}
+
+      {cfg.table === 'ad_settings' && <AdGuide />}
 
       {/* Search Toolbar */}
       <div className="easy-toolbar">

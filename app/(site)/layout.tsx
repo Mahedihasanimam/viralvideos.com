@@ -2,13 +2,23 @@ import TopBar from '@/components/TopBar'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import FloatingNightToggle from '@/components/FloatingNightToggle'
-import { Banner320x50Ad, Banner468x60Ad, Banner728x90Ad, SmartlinkAd } from '@/components/AdsterraAds'
+import {
+  Banner320x50Ad,
+  Banner468x60Ad,
+  Banner728x90Ad,
+  PopunderAd,
+  SocialbarAd,
+  SmartlinkAd,
+} from '@/components/AdsterraAds'
 
 export const dynamic = 'force-dynamic'
 
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
+export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <div id="outer-wrapper">
+      {/* Dynamic Popunder (controlled from Admin Dashboard) */}
+      <PopunderAd />
+
       {/* Top Bar */}
       <TopBar />
 
@@ -38,6 +48,10 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
 
       {/* Floating Night Mode Toggle Button */}
       <FloatingNightToggle />
+
+      {/* Dynamic Social Bar (controlled from Admin Dashboard) */}
+      <SocialbarAd />
     </div>
   )
 }
+

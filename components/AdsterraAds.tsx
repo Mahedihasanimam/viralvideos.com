@@ -1,82 +1,143 @@
 import Script from 'next/script'
 import type { CSSProperties } from 'react'
+import { sb } from '@/lib/supabase'
 
-interface BannerAdProps {
-  id: string
-  keyValue: string
+interface AdSetting {
+  slot: string
+  ad_type: 'banner' | 'native' | 'smartlink'
+  key_value: string
+  script_url: string
+  target_url: string
   width: number
   height: number
+  enabled: boolean
 }
 
-export function BannerAd({ id, keyValue, width, height }: BannerAdProps) {
+async function getAd(slot: string): Promise<AdSetting | null> {
+  const { data, error } = await sb()
+    .from('ad_settings')
+    .select('slot,ad_type,key_value,script_url,target_url,width,height,enabled')
+    .eq('slot', slot)
+    .maybeSingle()
+
+  if (error) {
+    console.error(`Could not load ad setting "${slot}":`, error.message)
+    return null
+  }
+  if (!data || !data.enabled) return null
+  return data as AdSetting
+}
+
+function BannerAd({ ad }: { ad: AdSetting }) {
+  if (!ad.key_value || !ad.script_url || !ad.width || !ad.height) return null
+
   return (
     <div
       className="adsterra-banner-ad"
-      data-ad-slot={id}
-      style={{ '--ad-width': `${width}px`, '--ad-height': `${height}px` } as CSSProperties}
+      data-ad-slot={ad.slot}
+      style={{ '--ad-width': `${ad.width}px`, '--ad-height': `${ad.height}px` } as CSSProperties}
       aria-label="Advertisement"
     >
       <script dangerouslySetInnerHTML={{ __html: `
         atOptions = {
-          'key' : '${keyValue}',
+          'key' : '${ad.key_value}',
           'format' : 'iframe',
-          'height' : ${height},
-          'width' : ${width},
+          'height' : ${ad.height},
+          'width' : ${ad.width},
           'params' : {}
         };
       ` }} />
-      <script src={`https://bancadeltempoidea.org/22/${keyValue}`} />
+      <script src={ad.script_url} />
     </div>
   )
 }
 
-export function NativeBannerAd() {
+export async function NativeBannerAd() {
+  const ad = await getAd('native_sidebar')
+  if (!ad || !ad.script_url || !ad.key_value) return null
+
   return (
     <div className="adsterra-native-ad" aria-label="Advertisement">
-      <Script
-        async
-        data-cfasync="false"
-        src="https://bancadeltempoidea.org/21/6fb853f324c105cabb940b068bf675d0"
-      />
-      <div id="container-6fb853f324c105cabb940b068bf675d0"></div>
+      <Script async data-cfasync="false" src={ad.script_url} />
+      <div id={`container-${ad.key_value}`}></div>
     </div>
   )
 }
 
-export function Banner300x250Ad() {
-  return <BannerAd id="banner-300x250" keyValue="6aee385fd7d8587b55e2df7c7f10bc8d" width={300} height={250} />
+async function configuredBanner(slot: string) {
+  const ad = await getAd(slot)
+  return ad && ad.ad_type === 'banner' ? <BannerAd ad={ad} /> : null
 }
 
-export function Banner468x60Ad() {
-  return <BannerAd id="banner-468x60" keyValue="a76fd710f7a27301e5c4e5a6a10ed59d" width={468} height={60} />
+export async function Banner300x250Ad() {
+  return configuredBanner('banner_300x250')
 }
 
-export function Banner160x300Ad() {
-  return <BannerAd id="banner-160x300" keyValue="92d17c94bab006dd97e6cb8ae3e5d36c" width={160} height={300} />
+export async function Banner468x60Ad() {
+  return configuredBanner('banner_468x60')
 }
 
-export function Banner160x600Ad() {
-  return <BannerAd id="banner-160x600" keyValue="a47386859ce7da6adccf870dd7f0aae6" width={160} height={600} />
+export async function Banner160x300Ad() {
+  return configuredBanner('banner_160x300')
 }
 
-export function Banner320x50Ad() {
-  return <BannerAd id="banner-320x50" keyValue="439ae85f24a41e503f4433dcf29bfdb3" width={320} height={50} />
+export async function Banner160x600Ad() {
+  return configuredBanner('banner_160x600')
 }
 
-export function Banner728x90Ad() {
-  return <BannerAd id="banner-728x90" keyValue="92befdeb1f92f13a75cdd637578617e7" width={728} height={90} />
+export async function Banner320x50Ad() {
+  return configuredBanner('banner_320x50')
 }
 
-export function SmartlinkAd() {
+export async function Banner728x90Ad() {
+  return configuredBanner('banner_728x90')
+}
+
+export async function SmartlinkAd() {
+  const ad = await getAd('smartlink_global')
+  if (!ad || ad.ad_type !== 'smartlink' || !ad.target_url) return null
+
   return (
     <div className="adsterra-smartlink" aria-label="Advertisement">
-      <a
-        href="https://directyp.org/4/d74988ed07d2e9cf1ebf1e68fcddcb89"
-        target="_blank"
-        rel="sponsored nofollow noopener noreferrer"
-      >
+      <a href={ad.target_url} target="_blank" rel="sponsored nofollow noopener noreferrer">
         Discover more entertainment
       </a>
     </div>
+  )
+}
+
+export async function PopunderAd() {
+  const ad = await getAd('popunder_global')
+  // If row exists in database and is disabled, don't show
+  if (ad && !ad.enabled) return null
+
+  const scriptUrl = ad?.script_url || 'https://aarems.org/1/f023ee03cd0e81f8ac94c7462316d8ba'
+  if (!scriptUrl) return null
+
+  return (
+    <Script
+      id="adsterra-popunder"
+      data-cfasync="false"
+      src={scriptUrl}
+      strategy="afterInteractive"
+    />
+  )
+}
+
+export async function SocialbarAd() {
+  const ad = await getAd('socialbar_global')
+  // If row exists in database and is disabled, don't show
+  if (ad && !ad.enabled) return null
+
+  const scriptUrl = ad?.script_url || 'https://bancadeltempoidea.org/14/7ca7d3009b54e2e6eb42f9b429b26800'
+  if (!scriptUrl) return null
+
+  return (
+    <Script
+      id="adsterra-socialbar"
+      data-cfasync="false"
+      src={scriptUrl}
+      strategy="lazyOnload"
+    />
   )
 }

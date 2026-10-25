@@ -2863,3 +2863,90 @@
   font-weight: 700;
   width: fit-content;
 }
+
+/* ── Adsterra Auto-Extractor & Setup Styles ─────────────────────── */
+.ad-extractor-box {
+  background: #f7faf8;
+  border: 1px solid #d2ded7;
+  border-radius: 9px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+}
+
+.ad-extractor-header {
+  margin-bottom: 12px;
+}
+
+.ad-extractor-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ad-extractor-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.ad-extractor-title strong {
+  display: block;
+  font-size: 14px;
+  color: #1e3328;
+  margin-bottom: 2px;
+}
+
+.ad-extractor-title p {
+  margin: 0;
+  font-size: 13px;
+  color: #6d7f78;
+}
+
+.ad-extractor-textarea {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid #d2ded7;
+  background: #ffffff;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color: #253137;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  box-sizing: border-box;
+}
+
+.ad-extractor-textarea:focus {
+  border-color: #31942e;
+  box-shadow: 0 0 0 3px rgba(49, 148, 46, 0.12);
+}
+
+.ad-extractor-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.ad-extractor-feedback {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.ad-extractor-feedback.ok {
+  background: #edf7ec;
+  border: 1px solid #b7e3b9;
+  color: #1e4d2b;
+}
+
+.ad-extractor-feedback.err {
+  background: #fde8e8;
+  border: 1px solid #f8b4b4;
+  color: #9b1c1c;
+}
