@@ -1,6 +1,7 @@
 import Script from 'next/script'
 import type { CSSProperties } from 'react'
 import { sb } from '@/lib/supabase'
+import AdsterraBannerScript from '@/components/AdsterraBannerScript'
 
 interface AdSetting {
   slot: string
@@ -13,23 +14,46 @@ interface AdSetting {
   enabled: boolean
 }
 
+const SLOT_ALIASES: Record<string, string[]> = {
+  native_sidebar: ['native_sidebar', 'Native_Banner', 'Native_Banner '],
+  banner_300x250: ['banner_300x250', 'Banner 300x250'],
+  banner_468x60: ['banner_468x60', '468x60'],
+  banner_160x300: ['banner_160x300', 'Banner 160x300'],
+  banner_160x600: ['banner_160x600', 'Banner 160x600'],
+  banner_320x50: ['banner_320x50', 'Banner 320x50'],
+  banner_728x90: ['banner_728x90', 'Banner 728x90'],
+  smartlink_global: ['smartlink_global', 'Smart link'],
+  popunder_global: ['popunder_global', 'Popunder ads', 'Popunder ads '],
+  socialbar_global: ['socialbar_global', 'Social Bar', 'Social Bar '],
+}
+
 async function getAd(slot: string): Promise<AdSetting | null> {
+  const slots = SLOT_ALIASES[slot] || [slot]
   const { data, error } = await sb()
     .from('ad_settings')
     .select('slot,ad_type,key_value,script_url,target_url,width,height,enabled')
-    .eq('slot', slot)
-    .maybeSingle()
+    .in('slot', slots)
+    .limit(1)
 
   if (error) {
     console.error(`Could not load ad setting "${slot}":`, error.message)
     return null
   }
-  if (!data || !data.enabled) return null
-  return data as AdSetting
+  const ad = data?.[0]
+  if (!ad || !ad.enabled) return null
+  return ad as AdSetting
 }
 
 function BannerAd({ ad }: { ad: AdSetting }) {
   if (!ad.key_value || !ad.script_url || !ad.width || !ad.height) return null
+
+  const config = {
+    key: ad.key_value,
+    format: 'iframe' as const,
+    height: ad.height,
+    width: ad.width,
+    params: {},
+  }
 
   return (
     <div
@@ -38,16 +62,7 @@ function BannerAd({ ad }: { ad: AdSetting }) {
       style={{ '--ad-width': `${ad.width}px`, '--ad-height': `${ad.height}px` } as CSSProperties}
       aria-label="Advertisement"
     >
-      <script dangerouslySetInnerHTML={{ __html: `
-        atOptions = {
-          'key' : '${ad.key_value}',
-          'format' : 'iframe',
-          'height' : ${ad.height},
-          'width' : ${ad.width},
-          'params' : {}
-        };
-      ` }} />
-      <script src={ad.script_url} />
+      <AdsterraBannerScript slot={ad.slot} scriptUrl={ad.script_url} config={config} />
     </div>
   )
 }
