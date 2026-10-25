@@ -17,6 +17,21 @@ create table if not exists nav_links (id uuid primary key default gen_random_uui
 create table if not exists admins (user_id uuid primary key references auth.users on delete cascade);
 grant select on admins to authenticated;
 
+-- Explicit table permissions for authenticated (admin) and anon (visitors)
+grant usage on schema public to anon, authenticated;
+grant all on all tables in schema public to authenticated;
+grant all on all sequences in schema public to authenticated;
+grant all on all routines in schema public to authenticated;
+
+grant select on all tables in schema public to anon;
+grant select on all sequences in schema public to anon;
+grant execute on all routines in schema public to anon;
+
+alter default privileges in schema public grant all on tables to authenticated;
+alter default privileges in schema public grant select on tables to anon;
+alter default privileges in schema public grant all on sequences to authenticated;
+alter default privileges in schema public grant select on sequences to anon;
+
 create or replace function is_admin() returns boolean language sql security definer stable
 set search_path = public
 as $$ select exists (select 1 from public.admins where user_id = auth.uid()) $$;
@@ -39,6 +54,11 @@ create policy "read" on posts for select using (published or is_admin());
 alter table admins enable row level security;
 drop policy if exists "self" on admins;
 create policy "self" on admins for select using (user_id = auth.uid());
+
+-- Automatically make any existing auth user an admin so they are never locked out
+insert into admins (user_id)
+select id from auth.users
+on conflict (user_id) do nothing;
 
 -- Every visible string on the site lives here. Add more rows any time.
 insert into site_texts (key, grp, label, value) values

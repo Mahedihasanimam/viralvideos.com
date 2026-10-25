@@ -1,2 +1,4 @@
-import { redirect } from 'next/navigation'
-export default function Admin() { redirect('/admin/site_texts') }
+import AdminDashboard from '@/components/AdminDashboard'
+export default function AdminHome() {
+  return <AdminDashboard />
+}

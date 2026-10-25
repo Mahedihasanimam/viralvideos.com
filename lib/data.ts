@@ -215,7 +215,7 @@ export async function getPage(slug: string): Promise<StaticPage | null> {
   return {
     slug: clean,
     title: clean.toUpperCase(),
-    content: `<p>Welcome to ${clean} page of Review Bazar Movies.</p>`,
+    content: `<p>Welcome to ${clean} page of Viral Videos Movies.</p>`,
   }
 }
 

@@ -16,8 +16,8 @@ export async function generateMetadata({ params }: Props) {
   const page = await getPage(params.slug)
   if (!page) return { title: 'Page Not Found' }
   return {
-    title: `${page.title} | Review Bazar Movies`,
-    description: `Official ${page.title} page of Review Bazar Movies.`,
+    title: `${page.title} | Viral Videos Movies`,
+    description: `Official ${page.title} page of Viral Videos Movies.`,
   }
 }
 
