@@ -31,6 +31,7 @@ export default function Header() {
         </div>
         <ul className="mobile-nav-list">
           <li><Link href="/" onClick={() => setMobileMenuOpen(false)}>Home</Link></li>
+          <li><Link href="/videos" onClick={() => setMobileMenuOpen(false)}>ভিডিও ও ট্রেলার</Link></li>
           <li><Link href="/?featured=1" onClick={() => setMobileMenuOpen(false)}>ফিচার</Link></li>
           <li><Link href="/category/bangla" onClick={() => setMobileMenuOpen(false)}>বাংলা মুভি এবং ওয়েব সিরিজ</Link></li>
           <li><Link href="/category/hindi" onClick={() => setMobileMenuOpen(false)}>হিন্দি মুভি ও ওয়েব সিরিজ</Link></li>
@@ -67,6 +68,7 @@ export default function Header() {
           <nav id="main-menu">
             <ul id="main-menu-nav" role="menubar">
               <li><Link href="/" role="menuitem">Home</Link></li>
+              <li><Link href="/videos" role="menuitem">ভিডিও</Link></li>
               <li><Link href="/?featured=1" role="menuitem">ফিচার</Link></li>
               <li><Link href="/category/bangla" role="menuitem">বাংলা মুভি এবং ওয়েব সিরিজ</Link></li>
               <li><Link href="/category/hindi" role="menuitem">হিন্দি মুভি ও ওয়েব সিরিজ</Link></li>

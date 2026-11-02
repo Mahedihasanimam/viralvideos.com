@@ -159,12 +159,34 @@ export default function SettingsPage() {
 
           <div className="settings-divider" />
 
-          <h3 className="settings-subheading">Database Schema & Permissions Fix</h3>
+          <h3 className="settings-subheading">Database Schema, Videos & Storage Fix</h3>
           <p className="settings-card-desc">
-            Creates all tables (including <strong>Ad Settings</strong>) and fixes permissions. Run this once in <strong>Supabase Dashboard &gt; SQL Editor</strong>:
+            Creates all tables (including <strong>Videos & Trailers</strong>, <strong>Ad Settings</strong>, video columns, and storage buckets). Run this once in <strong>Supabase Dashboard &gt; SQL Editor</strong>:
           </p>
           <div className="settings-sql-block">
-            <pre style={{ maxHeight: 180, overflowY: 'auto' }}>{`-- 1. Create ad_settings table
+            <pre style={{ maxHeight: 220, overflowY: 'auto' }}>{`-- 1. Create videos table & post video column
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS language text;
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS country text;
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS platform text;
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS download_url text;
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS video_url text;
+
+CREATE TABLE IF NOT EXISTS videos (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug text UNIQUE NOT NULL,
+  title text NOT NULL,
+  description text DEFAULT '',
+  video_url text NOT NULL,
+  thumbnail_url text DEFAULT '',
+  category_id uuid REFERENCES categories(id) ON DELETE SET NULL,
+  duration text DEFAULT '',
+  published boolean DEFAULT true,
+  featured boolean DEFAULT false,
+  views int DEFAULT 0,
+  created_at timestamptz DEFAULT now()
+);
+
+-- 2. Create ad_settings table
 CREATE TABLE IF NOT EXISTS ad_settings (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   slot text UNIQUE NOT NULL,
@@ -179,13 +201,12 @@ CREATE TABLE IF NOT EXISTS ad_settings (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
--- 2. Ensure post columns exist
-ALTER TABLE posts ADD COLUMN IF NOT EXISTS language text;
-ALTER TABLE posts ADD COLUMN IF NOT EXISTS country text;
-ALTER TABLE posts ADD COLUMN IF NOT EXISTS platform text;
-ALTER TABLE posts ADD COLUMN IF NOT EXISTS download_url text;
+-- 3. Storage buckets for videos and images
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('videos', 'videos', true), ('images', 'images', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
 
--- 3. Permissions
+-- 4. Permissions
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated;
@@ -200,7 +221,13 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO anon;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO authenticated;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON SEQUENCES TO anon;
 
--- 4. Enable RLS & policies for ad_settings
+-- 5. RLS & policies
+ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "read_videos" ON videos;
+DROP POLICY IF EXISTS "admin_videos" ON videos;
+CREATE POLICY "read_videos" ON videos FOR SELECT USING (published OR EXISTS (SELECT 1 FROM admins WHERE admins.user_id = auth.uid()));
+CREATE POLICY "admin_videos" ON videos FOR ALL USING (EXISTS (SELECT 1 FROM admins WHERE admins.user_id = auth.uid()));
+
 ALTER TABLE ad_settings ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "read_ads" ON ad_settings;
 DROP POLICY IF EXISTS "admin_ads" ON ad_settings;
@@ -208,6 +235,13 @@ CREATE POLICY "read_ads" ON ad_settings FOR SELECT USING (true);
 CREATE POLICY "admin_ads" ON ad_settings FOR ALL USING (
   EXISTS (SELECT 1 FROM admins WHERE admins.user_id = auth.uid())
 );
+
+-- Storage policies
+DROP POLICY IF EXISTS "Public Storage" ON storage.objects;
+CREATE POLICY "Public Storage" ON storage.objects FOR SELECT USING (bucket_id IN ('videos', 'images'));
+
+DROP POLICY IF EXISTS "Authenticated Upload" ON storage.objects;
+CREATE POLICY "Authenticated Upload" ON storage.objects FOR INSERT WITH CHECK (bucket_id IN ('videos', 'images'));
 
 -- 5. Insert default ad slots if not exist
 INSERT INTO ad_settings (slot, label, ad_type, key_value, script_url, target_url, width, height) VALUES

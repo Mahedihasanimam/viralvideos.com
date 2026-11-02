@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
+import VideoPlayer from '@/components/VideoPlayer'
 import {
   getPostBySlug,
   getRelatedPosts,
@@ -132,6 +133,23 @@ export default async function PostPage({ params }: Props) {
                     alt={post.title}
                     className="single-post-poster"
                     loading="lazy"
+                  />
+                </div>
+              )}
+
+              {/* Video Player (if uploaded or linked) */}
+              {post.video_url && (
+                <div className="single-post-video-section">
+                  <div className="single-video-header">
+                    <span className="single-video-badge">
+                      <i className="fa-solid fa-circle-play" style={{ marginRight: '6px' }}></i>
+                      ভিডিও ও ট্রেলার প্লেয়ার (Watch Video)
+                    </span>
+                  </div>
+                  <VideoPlayer
+                    url={post.video_url}
+                    poster={post.image_url}
+                    title={post.title}
                   />
                 </div>
               )}

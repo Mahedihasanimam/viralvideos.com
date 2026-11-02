@@ -6,6 +6,7 @@ import AdminIcon from '@/components/AdminIcon'
 
 interface Stats {
   posts: number
+  videos: number
   published: number
   drafts: number
   featured: number
@@ -26,6 +27,7 @@ export default function AdminDashboard() {
       try {
         const [
           { count: posts },
+          { count: videos },
           { count: published },
           { count: drafts },
           { count: featured },
@@ -37,6 +39,7 @@ export default function AdminDashboard() {
           { data: recentPosts },
         ] = await Promise.all([
           db().from('posts').select('*', { count: 'exact', head: true }),
+          db().from('videos').select('*', { count: 'exact', head: true }).then((r: any) => r).catch(() => ({ count: 0 })),
           db().from('posts').select('*', { count: 'exact', head: true }).eq('published', true),
           db().from('posts').select('*', { count: 'exact', head: true }).eq('published', false),
           db().from('posts').select('*', { count: 'exact', head: true }).eq('featured', true),
@@ -52,6 +55,7 @@ export default function AdminDashboard() {
 
         setStats({
           posts: posts || 0,
+          videos: videos || 0,
           published: published || 0,
           drafts: drafts || 0,
           featured: featured || 0,
@@ -80,6 +84,7 @@ export default function AdminDashboard() {
 
   const statCards = [
     { label: 'Total Posts', value: stats.posts, icon: 'film', color: 'green', href: '/admin/posts' },
+    { label: 'Videos & Trailers', value: stats.videos, icon: 'video', color: 'red', href: '/admin/videos' },
     { label: 'Published', value: stats.published, icon: 'check-circle', color: 'blue', href: '/admin/posts' },
     { label: 'Drafts', value: stats.drafts, icon: 'clock', color: 'orange', href: '/admin/posts' },
     { label: 'Featured', value: stats.featured, icon: 'star', color: 'yellow', href: '/admin/posts' },
@@ -90,6 +95,7 @@ export default function AdminDashboard() {
   ]
 
   const quickLinks = [
+    { label: 'Upload video', icon: 'video', href: '/admin/videos', desc: 'Add video file or YouTube stream' },
     { label: 'Write new post', icon: 'plus', href: '/admin/posts', desc: 'Create a new movie review' },
     { label: 'Manage posts', icon: 'film', href: '/admin/posts', desc: `${stats.published} published, ${stats.drafts} drafts` },
     { label: 'Edit categories', icon: 'tags', href: '/admin/categories', desc: `${stats.categories} categories` },

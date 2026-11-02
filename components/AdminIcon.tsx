@@ -2,6 +2,8 @@
 import React from 'react'
 import {
   LayoutDashboard,
+  Video,
+  Play,
   Film,
   Tags,
   FileText,
@@ -61,6 +63,16 @@ export default function AdminIcon({ name, size = 18, className = '' }: AdminIcon
     case 'dashboard':
     case 'LayoutDashboard':
       return <LayoutDashboard {...iconProps} />
+    case 'video':
+    case 'videos':
+    case 'Video':
+    case '📹':
+    case '🎥':
+      return <Video {...iconProps} />
+    case 'play':
+    case 'Play':
+    case '▶️':
+      return <Play {...iconProps} />
     case 'posts':
     case 'film':
     case 'Film':

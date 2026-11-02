@@ -12,6 +12,21 @@ alter table posts add column if not exists language text;
 alter table posts add column if not exists country text;
 alter table posts add column if not exists platform text;
 alter table posts add column if not exists download_url text;
+alter table posts add column if not exists video_url text;
+create table if not exists videos (
+  id uuid primary key default gen_random_uuid(),
+  slug text unique not null,
+  title text not null,
+  description text default '',
+  video_url text not null,
+  thumbnail_url text default '',
+  category_id uuid references categories(id) on delete set null,
+  duration text default '',
+  published boolean default true,
+  featured boolean default false,
+  views int default 0,
+  created_at timestamptz default now()
+);
 create table if not exists pages (slug text primary key, title text not null, content text default '');
 create table if not exists nav_links (id uuid primary key default gen_random_uuid(), label text not null, url text not null, location text default 'header', sort int default 0);
 create table if not exists ad_settings (
@@ -54,7 +69,7 @@ create or replace function increment_views(p_slug text) returns void language sq
 as $$ update posts set views = views + 1 where slug = p_slug $$;
 
 do $$ declare t text; begin
-  foreach t in array array['site_texts','categories','posts','pages','nav_links','ad_settings'] loop
+  foreach t in array array['site_texts','categories','posts','pages','nav_links','ad_settings','videos'] loop
     execute format('alter table %I enable row level security', t);
     execute format('drop policy if exists "read" on %I', t);
     execute format('drop policy if exists "admin" on %I', t);
@@ -64,9 +79,29 @@ do $$ declare t text; begin
 end $$;
 drop policy if exists "read" on posts;
 create policy "read" on posts for select using (published or is_admin());
+drop policy if exists "read" on videos;
+create policy "read" on videos for select using (published or is_admin());
 alter table admins enable row level security;
 drop policy if exists "self" on admins;
 create policy "self" on admins for select using (user_id = auth.uid());
+
+-- Ensure storage buckets exist
+insert into storage.buckets (id, name, public)
+values ('videos', 'videos', true), ('images', 'images', true)
+on conflict (id) do update set public = true;
+
+-- Bucket policies
+drop policy if exists "Public Storage Access" on storage.objects;
+create policy "Public Storage Access" on storage.objects for select using (bucket_id in ('videos', 'images'));
+
+drop policy if exists "Authenticated Storage Upload" on storage.objects;
+create policy "Authenticated Storage Upload" on storage.objects for insert with check (bucket_id in ('videos', 'images'));
+
+drop policy if exists "Authenticated Storage Update" on storage.objects;
+create policy "Authenticated Storage Update" on storage.objects for update using (bucket_id in ('videos', 'images'));
+
+drop policy if exists "Authenticated Storage Delete" on storage.objects;
+create policy "Authenticated Storage Delete" on storage.objects for delete using (bucket_id in ('videos', 'images'));
 
 -- Automatically make any existing auth user an admin so they are never locked out
 insert into admins (user_id)

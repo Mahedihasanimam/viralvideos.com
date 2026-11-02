@@ -3,17 +3,34 @@ import { useEffect, useState, useCallback } from 'react'
 import { db } from '@/lib/supabase'
 import AdminIcon from '@/components/AdminIcon'
 import ImageUploader from '@/components/ImageUploader'
+import VideoUploader from '@/components/VideoUploader'
 import RichTextEditor from '@/components/RichTextEditor'
 import AdGuide from '@/components/AdGuide'
 import AdExtractor from '@/components/AdExtractor'
 
 const PAGE_SIZE = 25
 
-const SQL_FIX = `-- 1. Ensure all columns exist on posts table
+const SQL_FIX = `-- 1. Ensure all columns exist on posts and create videos table
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS language text;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS country text;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS platform text;
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS download_url text;
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS video_url text;
+
+CREATE TABLE IF NOT EXISTS videos (
+  id uuid primary key default gen_random_uuid(),
+  slug text unique not null,
+  title text not null,
+  description text default '',
+  video_url text not null,
+  thumbnail_url text default '',
+  category_id uuid references categories(id) on delete set null,
+  duration text default '',
+  published boolean default true,
+  featured boolean default false,
+  views int default 0,
+  created_at timestamptz default now()
+);
 
 -- 2. Grant table access to authenticated (admin) and anon (visitors)
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
@@ -31,7 +48,26 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO anon;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO authenticated;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON SEQUENCES TO anon;
 
--- 4. Ensure admin user registration and reload schema cache
+-- 4. Enable RLS and policies for videos
+ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "read" ON videos;
+DROP POLICY IF EXISTS "admin" ON videos;
+CREATE POLICY "read" ON videos FOR SELECT USING (published OR is_admin());
+CREATE POLICY "admin" ON videos FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+
+-- 5. Ensure storage buckets exist
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('videos', 'videos', true), ('images', 'images', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- Storage policies
+DROP POLICY IF EXISTS "Public Videos Access" ON storage.objects;
+CREATE POLICY "Public Videos Access" ON storage.objects FOR SELECT USING (bucket_id IN ('videos', 'images'));
+
+DROP POLICY IF EXISTS "Authenticated Videos Upload" ON storage.objects;
+CREATE POLICY "Authenticated Videos Upload" ON storage.objects FOR INSERT WITH CHECK (bucket_id IN ('videos', 'images'));
+
+-- 6. Ensure admin user registration and reload schema cache
 INSERT INTO admins (user_id)
 SELECT id FROM auth.users
 ON CONFLICT (user_id) DO NOTHING;
@@ -165,11 +201,11 @@ export default function Crud({ cfg }: { cfg: any }) {
       }
     })
 
-    // Auto-generate slug for posts if blank
-    if (cfg.table === 'posts' && !r.slug) {
+    // Auto-generate slug for posts and videos if blank
+    if ((cfg.table === 'posts' || cfg.table === 'videos') && !r.slug) {
       r.slug = r.title
         ? r.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Date.now().toString(36)
-        : 'p-' + Date.now().toString(36)
+        : (cfg.table === 'videos' ? 'v-' : 'p-') + Date.now().toString(36)
     }
 
     // Try saving with automatic fallback for missing optional columns
@@ -308,8 +344,22 @@ export default function Crud({ cfg }: { cfg: any }) {
               const val = row[f.n] ?? ''
               const isLocked = f.lockOnEdit && !isNew
 
+              // Video Uploader (File upload from device OR paste link)
+              if (f.t === 'video' || f.n === 'video_url') {
+                return (
+                  <div key={f.n} className="easy-field-row easy-field-full">
+                    <VideoUploader
+                      value={val}
+                      onChange={url => setField(f.n, url)}
+                      label={f.l}
+                      hint={f.hint}
+                    />
+                  </div>
+                )
+              }
+
               // Image Uploader (File upload from device OR paste link)
-              if (f.t === 'image' || f.n === 'image_url') {
+              if (f.t === 'image' || f.n === 'image_url' || f.n === 'thumbnail_url') {
                 return (
                   <div key={f.n} className="easy-field-row easy-field-full">
                     <ImageUploader
@@ -583,14 +633,14 @@ export default function Crud({ cfg }: { cfg: any }) {
 
               return (
                 <div key={id} className="easy-item-row" onClick={() => openEdit(r)}>
-                  {/* Thumbnail if post */}
-                  {cfg.table === 'posts' && (
+                  {/* Thumbnail if post or video */}
+                  {(cfg.table === 'posts' || cfg.table === 'videos') && (
                     <div className="easy-item-thumb">
-                      {r.image_url ? (
-                        <img src={r.image_url} alt={title} />
+                      {r.thumbnail_url || r.image_url ? (
+                        <img src={r.thumbnail_url || r.image_url} alt={title} />
                       ) : (
                         <div className="easy-item-thumb-placeholder">
-                          <AdminIcon name="film" size={24} />
+                          <AdminIcon name={cfg.table === 'videos' ? 'video' : 'film'} size={24} />
                         </div>
                       )}
                     </div>
@@ -600,6 +650,7 @@ export default function Crud({ cfg }: { cfg: any }) {
                   <div className="easy-item-info">
                     <div className="easy-item-title-row">
                       <strong className="easy-item-title">{title}</strong>
+                      {r.video_url && <span className="easy-badge easy-badge-blue">▶ Video</span>}
                       {r.published === true && <span className="easy-badge easy-badge-green">Published</span>}
                       {r.published === false && <span className="easy-badge easy-badge-gray">Draft</span>}
                       {r.featured && <span className="easy-badge easy-badge-yellow">Featured ★</span>}

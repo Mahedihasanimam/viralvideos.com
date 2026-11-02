@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import PostCard from '@/components/PostCard'
+import VideoCard from '@/components/VideoCard'
 import Sidebar from '@/components/Sidebar'
 import { Banner468x60Ad } from '@/components/AdsterraAds'
-import { getPosts, getFeaturedPost } from '@/lib/data'
+import { getPosts, getFeaturedPost, getRecentVideos } from '@/lib/data'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,9 +21,10 @@ export default async function Home({ searchParams }: Props) {
   const limit = Math.max(6, Number(searchParams.n || 6))
   const showFeaturedOnly = searchParams.featured === '1'
 
-  const [{ posts, hasMore, total }, featuredPost] = await Promise.all([
+  const [{ posts, hasMore, total }, featuredPost, recentVideos] = await Promise.all([
     getPosts({ page, limit }),
     getFeaturedPost(),
+    getRecentVideos(4),
   ])
 
   const displayPosts = showFeaturedOnly && featuredPost ? [featuredPost] : posts
@@ -31,6 +33,27 @@ export default async function Home({ searchParams }: Props) {
     <>
       <div id="main-wrapper">
         <div className="main section" id="main">
+          {/* Latest Videos Section */}
+          {recentVideos && recentVideos.length > 0 && page === 1 && !showFeaturedOnly && (
+            <div className="home-videos-section" style={{ marginBottom: '24px' }}>
+              <div className="home-posts-headline title-wrap Label">
+                <h3 className="title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="fa-solid fa-circle-play" style={{ color: '#e50914' }}></i>
+                  ভিডিও ও ট্রেলার
+                </h3>
+                <Link className="view-all" href="/videos">
+                  সবগুলো দেখুন »
+                </Link>
+              </div>
+              <div className="clearfix"></div>
+              <div className="videos-grid-container">
+                {recentVideos.slice(0, 4).map(v => (
+                  <VideoCard key={v.id} video={v} />
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Section Headline */}
           <div className="home-posts-headline title-wrap Label">
             <h3 className="title">

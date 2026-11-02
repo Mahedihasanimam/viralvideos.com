@@ -30,6 +30,11 @@ export default function PostCard({ post }: { post: MoviePost }) {
             className="post-thumb lazy-yard"
             loading="lazy"
           />
+          {post.video_url && (
+            <span className="post-card-video-pill" title="Watch Video">
+              <i className="fa-solid fa-play"></i> Video
+            </span>
+          )}
         </Link>
       </div>
       <div className="post-info">
