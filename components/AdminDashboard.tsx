@@ -92,10 +92,6 @@ export default function AdminDashboard() {
       const totalVideoViews = (videoViewsData || []).reduce((s: number, v: any) => s + (v.views || 0), 0)
       const combinedViews = totalPostViews + totalVideoViews
 
-      // If site_visits is newly created, show at least minimum visits based on content views
-      const calcTotalVisits = Math.max(totalVisits || 0, Math.round(combinedViews * 0.75) + 85)
-      const calcTodayVisits = Math.max(todayVisits || 0, Math.round(calcTotalVisits * 0.08) + 12)
-
       setStats({
         posts: posts || 0,
         videos: videos || 0,
@@ -106,8 +102,8 @@ export default function AdminDashboard() {
         pages: pages || 0,
         nav_links: nav_links || 0,
         site_texts: site_texts || 0,
-        totalVisits: calcTotalVisits,
-        todayVisits: calcTodayVisits,
+        totalVisits: totalVisits || 0,
+        todayVisits: todayVisits || 0,
         postViews: totalPostViews,
         videoViews: totalVideoViews,
         totalViews: combinedViews,

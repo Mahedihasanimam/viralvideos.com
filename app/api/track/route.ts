@@ -173,13 +173,9 @@ export async function GET() {
     const totalVideoViews = (videoViewsData || []).reduce((sum: number, v: any) => sum + (v.views || 0), 0)
     const totalContentViews = totalPostViews + totalVideoViews
 
-    // If site_visits is 0 (table freshly created or not migrated yet), calculate an intelligent base
-    const effectiveTotalVisits = Math.max(totalVisits || 0, Math.round(totalContentViews * 0.75) + 120)
-    const effectiveTodayVisits = Math.max(todayVisits || 0, Math.round(effectiveTotalVisits * 0.08) + 15)
-
     return NextResponse.json({
-      totalVisits: effectiveTotalVisits,
-      todayVisits: effectiveTodayVisits,
+      totalVisits: totalVisits || 0,
+      todayVisits: todayVisits || 0,
       totalPostViews,
       totalVideoViews,
       totalContentViews,

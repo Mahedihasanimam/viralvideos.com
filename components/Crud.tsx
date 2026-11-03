@@ -248,6 +248,13 @@ export default function Crud({ cfg }: { cfg: any }) {
 
     // Try saving with automatic fallback for missing optional columns
     const payload = { ...r }
+
+    // Disable manual view editing: preserve live real-time views in database on edit
+    if (!isNew && (cfg.table === 'posts' || cfg.table === 'videos')) {
+      delete payload.views
+    } else if (isNew && (cfg.table === 'posts' || cfg.table === 'videos')) {
+      payload.views = 0
+    }
     let lastError: any = null
     let skippedCols: string[] = []
 
@@ -365,6 +372,16 @@ export default function Crud({ cfg }: { cfg: any }) {
           <div className="easy-card-header">
             <h2>{isNew ? `Create New ${singular}` : `Edit: ${row.title || row.name || row.label || singular}`}</h2>
             <p className="easy-card-sub">Fill in the details below. Click <strong>Save Changes</strong> when you are done.</p>
+            {!isNew && (cfg.table === 'posts' || cfg.table === 'videos') && (
+              <div className="easy-views-readonly-banner">
+                <span className="easy-views-readonly-tag">
+                  <AdminIcon name="eye" size={13} /> লাইভ ভিউ: {(row.views || 0).toLocaleString()}
+                </span>
+                <span className="easy-views-readonly-hint">
+                  ভিজিটর ভিজিট অনুযায়ী ভিউ স্বয়ংক্রিয়ভাবে বাড়ছে (ম্যানুয়াল এডিট বন্ধ আছে)
+                </span>
+              </div>
+            )}
           </div>
 
           {cfg.table === 'ad_settings' && (
