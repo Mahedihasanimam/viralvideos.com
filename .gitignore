@@ -28,8 +28,7 @@ pnpm-debug.log*
 .LSOverride
 *.swp
 *.swo
-.vscode/*
-!.vscode/settings.json
-!.vscode/extensions.json
-!.vscode/tasks.json
-!.vscode/launch.json
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore

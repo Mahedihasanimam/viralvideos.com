@@ -58,10 +58,7 @@ export default function DynamicVideoViews({
         }
       })
       .catch(() => {
-        if (!alreadyTracked) {
-          setViews(prev => prev + 1)
-          setHasUpdated(true)
-        }
+        // Only real database views are displayed
       })
   }, [slug])
 
