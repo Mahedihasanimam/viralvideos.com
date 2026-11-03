@@ -182,11 +182,53 @@ export async function getPostBySlug(slug: string): Promise<MoviePost | null> {
 }
 
 export async function getPopularPosts(limit = 4): Promise<MoviePost[]> {
+  try {
+    const s = sb()
+    const { data } = await s
+      .from('posts')
+      .select('*, categories(name, slug)')
+      .eq('published', true)
+      .order('views', { ascending: false })
+      .limit(limit)
+    if (data && data.length > 0) {
+      return data.map((p: any) => ({
+        ...p,
+        category: p.categories?.name || 'বাংলা মুভি এবং ওয়েব সিরিজ',
+        categories: [p.categories?.name || 'বাংলা মুভি এবং ওয়েব সিরিজ'],
+        published_at: p.created_at,
+      }))
+    }
+  } catch {
+    // fallback
+  }
+
   const sorted = [...inMemoryPosts].sort((a, b) => (b.views || 0) - (a.views || 0))
   return sorted.slice(0, limit)
 }
 
 export async function getFeaturedPost(): Promise<MoviePost | null> {
+  try {
+    const s = sb()
+    const { data } = await s
+      .from('posts')
+      .select('*, categories(name, slug)')
+      .eq('published', true)
+      .eq('featured', true)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (data) {
+      return {
+        ...data,
+        category: data.categories?.name || 'বাংলা মুভি এবং ওয়েব সিরিজ',
+        categories: [data.categories?.name || 'বাংলা মুভি এবং ওয়েব সিরিজ'],
+        published_at: data.created_at,
+      }
+    }
+  } catch {
+    // fallback
+  }
+
   return inMemoryPosts.find(p => p.featured) || inMemoryPosts[0] || null
 }
 

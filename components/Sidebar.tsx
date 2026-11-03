@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import LiveSearchBox from './LiveSearchBox'
+import VisitorStatsWidget from './VisitorStatsWidget'
 import { getPopularPosts, getCategories } from '@/lib/data'
-import { formatBengaliDate } from '@/lib/date'
+import { formatBengaliDate, toBengaliNumerals } from '@/lib/date'
 import {
   Banner160x300Ad,
   Banner300x250Ad,
@@ -54,11 +55,27 @@ export default async function Sidebar() {
                       <span className="post-date published">
                         {formatBengaliDate(post.published_at)}
                       </span>
+                      {post.views != null && (
+                        <span className="post-views-count" style={{ marginLeft: '8px', color: '#e50914', fontSize: '11px', fontWeight: 600 }}>
+                          <i className="fa-solid fa-eye" style={{ marginRight: '3px' }}></i>
+                          {toBengaliNumerals(post.views)}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Widget: Live Visitor Statistics */}
+        <div className="widget HTML" id="VisitorStatsWidgetBox">
+          <div className="widget-title">
+            <h3 className="title">ভিজিটর পরিসংখ্যান</h3>
+          </div>
+          <div className="widget-content">
+            <VisitorStatsWidget />
           </div>
         </div>
 

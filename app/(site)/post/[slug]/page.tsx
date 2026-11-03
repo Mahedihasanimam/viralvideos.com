@@ -2,12 +2,12 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import VideoPlayer from '@/components/VideoPlayer'
+import DynamicPostViews from '@/components/DynamicPostViews'
 import {
   getPostBySlug,
   getRelatedPosts,
   getPrevAndNextPost,
   getCategoryBySlug,
-  incrementPostViews,
 } from '@/lib/data'
 import { formatBengaliDate, toBengaliNumerals } from '@/lib/date'
 
@@ -36,8 +36,6 @@ export async function generateMetadata({ params }: Props) {
 export default async function PostPage({ params }: Props) {
   const post = await getPostBySlug(params.slug)
   if (!post) notFound()
-
-  incrementPostViews(post.slug)
 
   const [relatedPosts, { newer, older }] = await Promise.all([
     getRelatedPosts(post, 3),
@@ -78,10 +76,7 @@ export default async function PostPage({ params }: Props) {
               <span className="post-date published">
                 {formatBengaliDate(post.published_at)}
               </span>
-              <span className="post-views">
-                <i className="fa-solid fa-eye" style={{ marginRight: '4px' }}></i>
-                {toBengaliNumerals(post.views)} ভিউ
-              </span>
+              <DynamicPostViews slug={post.slug} initialViews={post.views} />
             </div>
 
             {/* Post Body */}

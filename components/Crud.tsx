@@ -32,6 +32,44 @@ CREATE TABLE IF NOT EXISTS videos (
   created_at timestamptz default now()
 );
 
+-- Site visits tracking
+CREATE TABLE IF NOT EXISTS site_visits (
+  id uuid primary key default gen_random_uuid(),
+  path text not null default '/',
+  item_type text default 'page',
+  slug text default '',
+  visitor_id text default '',
+  created_at timestamptz default now()
+);
+CREATE INDEX IF NOT EXISTS idx_site_visits_created_at ON site_visits(created_at);
+CREATE INDEX IF NOT EXISTS idx_site_visits_item_type ON site_visits(item_type);
+
+-- Atomic views increment functions
+DROP FUNCTION IF EXISTS increment_views(text);
+DROP FUNCTION IF EXISTS increment_video_views(text);
+
+CREATE OR REPLACE FUNCTION increment_views(p_slug text) RETURNS int LANGUAGE plpgsql SECURITY DEFINER
+AS $$
+DECLARE v_views int;
+BEGIN
+  UPDATE posts SET views = coalesce(views, 0) + 1 WHERE slug = p_slug RETURNING views INTO v_views;
+  RETURN coalesce(v_views, 0);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION increment_video_views(p_slug text) RETURNS int LANGUAGE plpgsql SECURITY DEFINER
+AS $$
+DECLARE v_views int;
+BEGIN
+  UPDATE videos SET views = coalesce(views, 0) + 1 WHERE slug = p_slug RETURNING views INTO v_views;
+  RETURN coalesce(v_views, 0);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION increment_views(text) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION increment_video_views(text) TO anon, authenticated;
+GRANT INSERT, SELECT ON site_visits TO anon, authenticated;
+
 -- 2. Grant table access to authenticated (admin) and anon (visitors)
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO authenticated;

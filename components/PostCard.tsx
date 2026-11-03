@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { MoviePost, getCategoryBySlug } from '@/lib/data'
+import { toBengaliNumerals } from '@/lib/date'
 
 export default function PostCard({ post }: { post: MoviePost }) {
   const catObj = getCategoryBySlug(post.category)
@@ -45,7 +46,14 @@ export default function PostCard({ post }: { post: MoviePost }) {
           <Link href={postUrl}>{post.title}</Link>
         </h2>
         <div className="index-post-footer">
-          <div className="post-meta"></div>
+          <div className="post-meta">
+            {post.views != null && (
+              <span className="post-views" style={{ fontSize: '12px', color: '#64748b' }}>
+                <i className="fa-solid fa-eye" style={{ marginRight: '4px' }}></i>
+                {toBengaliNumerals(post.views)} ভিউ
+              </span>
+            )}
+          </div>
           <p className="post-snippet">{snippet}</p>
           <Link href={postUrl} className="read-more">
             <span>Read more »</span>

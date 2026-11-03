@@ -48,6 +48,10 @@ import {
   AlignCenter,
   Undo,
   Redo,
+  Users,
+  RefreshCw,
+  TrendingUp,
+  Activity,
 } from 'lucide-react'
 
 interface AdminIconProps {
@@ -63,6 +67,18 @@ export default function AdminIcon({ name, size = 18, className = '' }: AdminIcon
     case 'dashboard':
     case 'LayoutDashboard':
       return <LayoutDashboard {...iconProps} />
+    case 'users':
+    case 'Users':
+    case 'user':
+      return <Users {...iconProps} />
+    case 'refresh':
+    case 'refresh-cw':
+      return <RefreshCw {...iconProps} />
+    case 'trending':
+    case 'trending-up':
+      return <TrendingUp {...iconProps} />
+    case 'activity':
+      return <Activity {...iconProps} />
     case 'video':
     case 'videos':
     case 'Video':

@@ -2030,3 +2030,123 @@ html.dark-mode-active .videos-count-badge {
   background: #334155;
   color: #cbd5e1;
 }
+
+/* ── Dynamic Views & Visitor Counter Styles ─────────────────────────── */
+.dynamic-views {
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.dynamic-views.views-live .views-number {
+  animation: viewPulse 0.6s ease;
+}
+
+@keyframes viewPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); color: #e50914; }
+  100% { transform: scale(1); }
+}
+
+.visitor-stats-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f8fafc;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.visitor-stats-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+}
+
+.stats-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #e0f2fe;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.stats-icon-today {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.stats-icon-views {
+  background: #fce7f3;
+  color: #db2777;
+}
+
+.stats-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.stats-label {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.stats-value {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.visitor-stats-live {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #16a34a;
+  font-weight: 700;
+  padding-top: 4px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.visitor-stats-live .live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: livePulse 2s infinite;
+}
+
+/* Dark mode compatibility */
+html.dark-mode-active .visitor-stats-box {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+html.dark-mode-active .visitor-stats-item {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+html.dark-mode-active .stats-label {
+  color: #94a3b8;
+}
+
+html.dark-mode-active .stats-value {
+  color: #f1f5f9;
+}
+
+html.dark-mode-active .visitor-stats-live {
+  border-top-color: #334155;
+}

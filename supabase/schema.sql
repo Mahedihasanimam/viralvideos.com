@@ -65,11 +65,48 @@ set search_path = public
 as $$ select exists (select 1 from public.admins where user_id = auth.uid()) $$;
 grant execute on function is_admin() to anon, authenticated;
 
-create or replace function increment_views(p_slug text) returns void language sql security definer
-as $$ update posts set views = views + 1 where slug = p_slug $$;
+-- Drop previous function definitions if return type was changed
+drop function if exists increment_views(text);
+drop function if exists increment_video_views(text);
+
+create or replace function increment_views(p_slug text) returns int language plpgsql security definer
+as $$
+declare
+  v_views int;
+begin
+  update posts set views = coalesce(views, 0) + 1 where slug = p_slug returning views into v_views;
+  return coalesce(v_views, 0);
+end;
+$$;
+
+create or replace function increment_video_views(p_slug text) returns int language plpgsql security definer
+as $$
+declare
+  v_views int;
+begin
+  update videos set views = coalesce(views, 0) + 1 where slug = p_slug returning views into v_views;
+  return coalesce(v_views, 0);
+end;
+$$;
+
+grant execute on function increment_views(text) to anon, authenticated;
+grant execute on function increment_video_views(text) to anon, authenticated;
+
+-- Site visits tracking table
+create table if not exists site_visits (
+  id uuid primary key default gen_random_uuid(),
+  path text not null default '/',
+  item_type text default 'page',
+  slug text default '',
+  visitor_id text default '',
+  created_at timestamptz default now()
+);
+create index if not exists idx_site_visits_created_at on site_visits(created_at);
+create index if not exists idx_site_visits_item_type on site_visits(item_type);
+grant insert, select on site_visits to anon, authenticated;
 
 do $$ declare t text; begin
-  foreach t in array array['site_texts','categories','posts','pages','nav_links','ad_settings','videos'] loop
+  foreach t in array array['site_texts','categories','posts','pages','nav_links','ad_settings','videos','site_visits'] loop
     execute format('alter table %I enable row level security', t);
     execute format('drop policy if exists "read" on %I', t);
     execute format('drop policy if exists "admin" on %I', t);
@@ -77,6 +114,8 @@ do $$ declare t text; begin
     execute format('create policy "admin" on %I for all using (is_admin()) with check (is_admin())', t);
   end loop;
 end $$;
+drop policy if exists "insert_visits" on site_visits;
+create policy "insert_visits" on site_visits for insert with check (true);
 drop policy if exists "read" on posts;
 create policy "read" on posts for select using (published or is_admin());
 drop policy if exists "read" on videos;

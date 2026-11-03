@@ -3,7 +3,8 @@ import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import VideoPlayer from '@/components/VideoPlayer'
 import VideoCard from '@/components/VideoCard'
-import { getVideoBySlug, getRecentVideos, incrementVideoViews } from '@/lib/data'
+import DynamicVideoViews from '@/components/DynamicVideoViews'
+import { getVideoBySlug, getRecentVideos } from '@/lib/data'
 import { formatBengaliDate, toBengaliNumerals } from '@/lib/date'
 
 export const dynamic = 'force-dynamic'
@@ -31,8 +32,6 @@ export async function generateMetadata({ params }: Props) {
 export default async function SingleVideoPage({ params }: Props) {
   const video = await getVideoBySlug(params.slug)
   if (!video) notFound()
-
-  incrementVideoViews(video.slug)
 
   const recentVideos = (await getRecentVideos(4)).filter(v => v.slug !== video.slug).slice(0, 3)
   const shareUrl = `/video/${video.slug}`
@@ -75,10 +74,7 @@ export default async function SingleVideoPage({ params }: Props) {
                   {video.category}
                 </span>
               )}
-              <span className="post-views">
-                <i className="fa-solid fa-eye" style={{ marginRight: '4px' }}></i>
-                {toBengaliNumerals(video.views || 0)} ভিউ
-              </span>
+              <DynamicVideoViews slug={video.slug} initialViews={video.views || 0} />
             </div>
 
             {/* Large Full-Width Video Player */}

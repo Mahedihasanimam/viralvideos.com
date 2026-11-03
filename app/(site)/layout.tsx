@@ -2,6 +2,7 @@ import TopBar from '@/components/TopBar'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import FloatingNightToggle from '@/components/FloatingNightToggle'
+import SiteVisitTracker from '@/components/SiteVisitTracker'
 import {
   Banner320x50Ad,
   Banner468x60Ad,
@@ -16,6 +17,9 @@ export const dynamic = 'force-dynamic'
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <div id="outer-wrapper">
+      {/* Real-time Dynamic Site Visitor Tracker */}
+      <SiteVisitTracker />
+
       {/* Dynamic Popunder (controlled from Admin Dashboard) */}
       <PopunderAd />
 
